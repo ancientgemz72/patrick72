@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garou Destroy Game</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        overflow: hidden;
+        height: 100vh;
+        background: url('grass.png') no-repeat center/cover; /* 🌿 grass background */
+        font-family: 'Arial';
+        color: white;
+        cursor: crosshair;
+    }
+
+    .garou {
+        position: absolute;
+        top: -180px;
+        width: 180px;
+        height: 180px;
+        background: url('garou.png') no-repeat center/contain;
+        animation: fall linear;
+    }
+
+    @keyframes fall {
+        0% { top: -180px; opacity: 1; }
+        100% { top: 100vh; opacity: 0.8; }
+    }
+
+    #score {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        font-size: 24px;
+        background: rgba(0,0,0,0.4);
+        padding: 8px 15px;
+        border-radius: 10px;
+    }
+
+    #gameover {
+        display: none;
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 40px;
+        color: #fff;
+        text-align: center;
+        background: rgba(0,0,0,0.5);
+        padding: 20px 40px;
+        border-radius: 15px;
+    }
+</style>
+</head>
+<body>
+
+<div id="score">Kills: 0</div>
+<div id="gameover">🎮 Game Over!<br>Refresh to Play Again</div>
+
+<script>
+let kills = 0;
+let missed = 0;
+let gameOver = false;
+const scoreDisplay = document.getElementById("score");
+const gameOverText = document.getElementById("gameover");
+
+// Create a Garou enemy
+function createGarou() {
+    if (gameOver) return;
+
+    const garou = document.createElement("div");
+    garou.classList.add("garou");
+    garou.style.left = Math.random() * (window.innerWidth - 180) + "px";
+    document.body.appendChild(garou);
+
+    let topPos = -180;
+    const speed = 2 + Math.random() * 2;
+    const fallInterval = setInterval(() => {
+        if (gameOver) { clearInterval(fallInterval); garou.remove(); return; }
+        topPos += speed;
+        garou.style.top = topPos + "px";
+
+        if (topPos > window.innerHeight - 10) {
+            clearInterval(fallInterval);
+            garou.remove();
+            missed++;
+            if (missed >= 5) {
+                gameOver = true;
+                gameOverText.style.display = "block";
+            }
+        }
+    }, 25);
+
+    // Click to destroy
+    garou.addEventListener("click", () => {
+        clearInterval(fallInterval);
+        garou.remove();
+        kills++;
+        scoreDisplay.innerText = "Kills: " + kills;
+    });
+}
+
+// 🌩️ Spawn more frequently (every 600ms)
+setInterval(createGarou, 600);
+</script>
+
+</body>
+</html>
